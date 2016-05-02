@@ -1,9 +1,0 @@
-grammar io.chark.Kebab_Lang with org.eclipse.xtext.common.Terminals
-
-generate kebab_Lang "http://www.chark.io/Kebab_Lang"
-
-Model:
-	greetings+=Greeting*;
-	
-Greeting:
-	'Hello' name=ID '!';
