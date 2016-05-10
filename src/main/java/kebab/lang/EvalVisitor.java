@@ -405,6 +405,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     }
 
     // String indexes?                          #stringExpression
+    // todo fix replacing
     @Override
     public KebabValue visitStringExpression(@NotNull KebabParser.StringExpressionContext ctx) {
         String text = ctx.getText();

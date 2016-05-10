@@ -19,5 +19,5 @@ _if(a) {
 @ Check if inverted boolean works.
 a: no
 _if(!a) {
-    show('no')
+    show('no' + 'ab\n')
 }
