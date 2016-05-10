@@ -31,5 +31,6 @@ sourceSets {
 }
 
 generateGrammarSource {
+    arguments += '-visitor'
     outputDirectory = new File("${project.rootDir}/${rootProject.ext.generatedDir}/kebab".toString())
 }
