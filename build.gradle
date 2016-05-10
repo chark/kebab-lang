@@ -10,28 +10,26 @@ repositories {
 }
 
 dependencies {
-    antlr "org.antlr:antlr4:4.5"
-
-    testCompile('junit:junit:4.11')
+    antlr 'org.antlr:antlr4:4.5'
+    testCompile 'junit:junit:4.11'
 }
 
-// todo fix this
-//ext {
-//    generatedDir = 'src/main/generated'
-//}
-//
-//clean {
-//    delete rootProject.ext.generatedDir
-//}
-//
-//sourceSets {
-//    main {
-//        java {
-//            srcDir rootProject.ext.generatedDir
-//        }
-//    }
-//}
-//
-//generateGrammarSource {
-//    outputDirectory = new File("${project.rootDir}/${rootProject.ext.generatedDir}".toString())
-//}
+ext {
+    generatedDir = 'src/main/generated'
+}
+
+clean {
+    delete rootProject.ext.generatedDir
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.ext.generatedDir
+        }
+    }
+}
+
+generateGrammarSource {
+    outputDirectory = new File("${project.rootDir}/${rootProject.ext.generatedDir}/kebab".toString())
+}
