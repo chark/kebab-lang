@@ -504,17 +504,15 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         throw new KebabException(ctx);
     }
 
-    // Println '(' expression? ')'  #printlnFunctionCall
+    /**
+     * Printing of variables.
+     * <pre>
+     * | Show '(' expression ')'
+     * </pre>
+     */
     @Override
-    public KebabValue visitPrintlnFunctionCall(@NotNull KebabParser.PrintlnFunctionCallContext ctx) {
-        System.out.println(this.visit(ctx.expression()));
-        return KebabValue.VOID;
-    }
-
-    // Print '(' expression ')'     #printFunctionCall
-    @Override
-    public KebabValue visitPrintFunctionCall(@NotNull KebabParser.PrintFunctionCallContext ctx) {
-        System.out.print(this.visit(ctx.expression()));
+    public KebabValue visitShowFunctionCall(KebabParser.ShowFunctionCallContext ctx) {
+        System.out.println(this.visit(ctx.expression()).asString());
         return KebabValue.VOID;
     }
 

@@ -3,21 +3,21 @@ keb a: 3
 
 @ Complete if statement.
 _if(a < 2) {
-    println("less " + a)
+    show('less ' + a)
 } _elif(a == 1) {
-      println("one " + a)
+      show('one \n' + a)
 } _el {
-    println("more " + a)
+    show('more ' + a)
 }
 
 @ Check if boolean and re-assignment works.
 a: yes
 _if(a) {
-    println("yes")
+    show('yes')
 }
 
 @ Check if inverted boolean works.
 a: no
 _if(!a) {
-    println("no")
+    show('no')
 }

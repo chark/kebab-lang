@@ -45,8 +45,7 @@ reAssignment
 
 functionCall
  : Identifier '(' exprList? ')' #identifierFunctionCall
- | Println '(' expression? ')'  #printlnFunctionCall
- | Print '(' expression ')'     #printFunctionCall
+ | Show '(' expression ')'      #showFunctionCall
  | Assert '(' expression ')'    #assertFunctionCall
  | Size '(' expression ')'      #sizeFunctionCall
  ;
@@ -148,8 +147,9 @@ If       : '_if';
 Else     : '_el';
 ElseIf   : '_elif';
 
-Println  : 'println';
-Print    : 'print';
+// Printing function (new-line).
+Show    : 'show';
+
 Input    : 'input';
 Assert   : 'assert';
 Size     : 'size';
