@@ -1,5 +1,8 @@
 package kebab.lang;
 
+import kebab.util.KebabException;
+import org.antlr.v4.runtime.Token;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +42,24 @@ public class Scope {
         this.variables.put(var, value);
     }
 
-    public void assign(String var, KebabValue value) {
-        if (resolve(var) != null) {
+    /**
+     * Assign a new variable.
+     *
+     * @param token    token start where the assignment happens.
+     * @param variable variable identifier.
+     * @param value    value of the variable.
+     */
+    public void assign(Token token, String variable, KebabValue value) {
+        if (resolve(variable) != null) {
 
-            // There is already such a variable, re-assign it.
-            this.reAssign(var, value);
+            // Do not re-assign a variable by default.
+            throw new KebabException(token, "Variable '%s' already declared in this scope",
+                    variable);
+
         } else {
 
             // A newly declared variable.
-            variables.put(var, value);
+            variables.put(variable, value);
         }
     }
 
@@ -67,16 +79,23 @@ public class Scope {
         return parent;
     }
 
-    private void reAssign(String identifier, KebabValue value) {
-        if (variables.containsKey(identifier)) {
+    /**
+     * Re-assign a variable.
+     *
+     * @param token    token start where the assignment happens.
+     * @param variable variable identifier.
+     * @param value    new variable value.
+     */
+    public void reAssign(Token token, String variable, KebabValue value) {
+        if (variables.containsKey(variable)) {
 
             // The variable is declared in this scope.
-            variables.put(identifier, value);
+            variables.put(variable, value);
         } else if (parent != null) {
 
-            // The variable was not declared in this scope, so let
-            // the parent scope re-assign it.
-            parent.reAssign(identifier, value);
+            // The variable was not declared in this scope.
+            throw new KebabException(token, "Variable '%s' is not declared in this scope",
+                    variable);
         }
     }
 

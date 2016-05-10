@@ -8,20 +8,39 @@ parse
  : block EOF
  ;
 
+// A block, can be a variable or a function.
 block
  : (statement | functionDecl)* (Return expression ';')?
  ;
 
+// A generic statement, for example assignment keb a: 1
 statement
- : assignment ';'
- | functionCall ';'
- | ifStatement
+ : assignment
+ | reAssignment
+ | functionCall
+ | completeIfStatement
  | forStatement
  | whileStatement
  ;
 
+/*
+    Assign a value to a variable.
+
+    keb a: 1
+*/
 assignment
- : Identifier indexes? '=' expression
+ : 'keb' Identifier indexes? ':' expression
+ | 'keb' Identifier indexes?
+ ;
+
+/*
+    Re-assign an existing variable value.
+
+    keb a: 1
+    a: yes
+*/
+reAssignment
+ : Identifier indexes? ':' expression
  ;
 
 functionCall
@@ -32,32 +51,46 @@ functionCall
  | Size '(' expression ')'      #sizeFunctionCall
  ;
 
+/*
+    A complete if statement.
+
+    _if(...) {
+
+    } _elif(...) {
+
+    } _el {
+
+    }
+*/
+completeIfStatement
+ : ifStatement elseIfStatement* elseStatement? Close
+ ;
+
+// _if
 ifStatement
- : ifStat elseIfStat* elseStat? End
+ : If '(' expression ')' Open block
  ;
 
-ifStat
- : If expression Do block
+// } _elif {
+elseIfStatement
+ : Close ElseIf '(' expression ')' Open block
  ;
 
-elseIfStat
- : Else If expression Do block
- ;
-
-elseStat
- : Else Do block
+// } _el {
+elseStatement
+ : Close Else Open block
  ;
 
 functionDecl
- : Def Identifier '(' idList? ')' block End
+ : Def Identifier '(' idList? ')' block Close
  ;
 
 forStatement
- : For Identifier '=' expression To expression Do block End
+ : For Identifier '=' expression To expression Open block Close
  ;
 
 whileStatement
- : While expression Do block End
+ : While expression Open block Close
  ;
 
 idList
@@ -106,22 +139,27 @@ indexes
  : ('[' expression ']')+
  ;
 
+// Block tokens.
+Open      : '{';
+Close     : '}';
+
+// If statements.
+If       : '_if';
+Else     : '_el';
+ElseIf   : '_elif';
+
 Println  : 'println';
 Print    : 'print';
 Input    : 'input';
 Assert   : 'assert';
 Size     : 'size';
 Def      : 'def';
-If       : 'if';
-Else     : 'else';
 Return   : 'return';
 For      : 'for';
 While    : 'while';
 To       : 'to';
-Do       : 'do';
-End      : 'end';
 In       : 'in';
-Null     : 'null';
+Null     : 'empy';
 
 Or       : '||';
 And      : '&&';
@@ -150,9 +188,10 @@ Comma    : ',';
 QMark    : '?';
 Colon    : ':';
 
+// Yes = true, no = false.
 Bool
- : 'true'
- | 'false'
+ : 'yes'
+ | 'no'
  ;
 
 Number
@@ -167,9 +206,11 @@ String
  : ["] (~["\r\n] | '\\\\' | '\\"')* ["]
  | ['] (~['\r\n] | '\\\\' | '\\\'')* [']
  ;
+
 Comment
- : ('//' ~[\r\n]* | '/*' .*? '*/') -> skip
+ : ('@' ~[\r\n]*) -> skip
  ;
+
 Space
  : [ \t\r\n\u000C] -> skip
  ;

@@ -1,3 +1,23 @@
-keb a: 1
+@ Initial variable assignment.
+keb a: 3
 
-println(a)
+@ Complete if statement.
+_if(a < 2) {
+    println("less " + a)
+} _elif(a == 1) {
+      println("one " + a)
+} _el {
+    println("more " + a)
+}
+
+@ Check if boolean and re-assignment works.
+a: yes
+_if(a) {
+    println("yes")
+}
+
+@ Check if inverted boolean works.
+a: no
+_if(!a) {
+    println("no")
+}

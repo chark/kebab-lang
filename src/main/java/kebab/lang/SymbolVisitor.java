@@ -23,7 +23,7 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
         // Get func parameters and func name.
         List<TerminalNode> params = context.idList() != null ?
                 context.idList().Identifier() :
-                new ArrayList<TerminalNode>();
+                new ArrayList<>();
 
         // Func code block.
         ParseTree block = context.block();

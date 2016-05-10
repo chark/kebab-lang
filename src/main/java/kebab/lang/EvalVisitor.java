@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
 
+    private static final String BOOL_TRUE = "yes";
+
     private static ReturnValue returnValue = new ReturnValue();
     private Scope scope;
     private Map<String, Func> functions;
@@ -323,7 +325,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     // Bool                                     #boolExpression
     @Override
     public KebabValue visitBoolExpression(@NotNull KebabParser.BoolExpressionContext ctx) {
-        return new KebabValue(Boolean.valueOf(ctx.getText()));
+        return new KebabValue(BOOL_TRUE.equals(ctx.getText()));
     }
 
     // Null                                     #nullExpression
@@ -444,20 +446,48 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         }
     }
 
+    /**
+     * Reassignment to variable.
+     * <pre>
+     * reAssignment
+     * : Identifier indexes? ':' expression
+     * ;
+     * </pre>
+     */
+    @Override
+    public KebabValue visitReAssignment(@NotNull KebabParser.ReAssignmentContext ctx) {
+        scope.reAssign(ctx.start,
+                ctx.Identifier().getText(),
+                this.visit(ctx.expression()));
 
-    // assignment
-    // : Identifier indexes? '=' expression
-    // ;
+        return KebabValue.VOID;
+    }
+
+    /**
+     * Assignment/creation of a variable.
+     * <pre>
+     * assignment
+     * : 'keb' Identifier indexes? ':' expression
+     * ;
+     * </pre>
+     */
     @Override
     public KebabValue visitAssignment(@NotNull KebabParser.AssignmentContext ctx) {
+
+        // Variable created without assignment.
+        if (ctx.expression() == null) {
+            scope.assign(ctx.start, ctx.Identifier().getText(), KebabValue.EMPTY);
+            return KebabValue.VOID;
+        }
+
         KebabValue newVal = this.visit(ctx.expression());
         if (ctx.indexes() != null) {
             KebabValue val = scope.resolve(ctx.Identifier().getText());
-            List<KebabParser.ExpressionContext> exps = ctx.indexes().expression();
-            setAtIndex(ctx, exps, val, newVal);
+            List<KebabParser.ExpressionContext> expression = ctx.indexes().expression();
+            setAtIndex(ctx, expression, val, newVal);
         } else {
             String id = ctx.Identifier().getText();
-            scope.assign(id, newVal);
+            scope.assign(ctx.start, id, newVal);
         }
         return KebabValue.VOID;
     }
@@ -465,7 +495,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     // Identifier '(' exprList? ')' #identifierFunctionCall
     @Override
     public KebabValue visitIdentifierFunctionCall(KebabParser.IdentifierFunctionCallContext ctx) {
-        List<KebabParser.ExpressionContext> params = ctx.exprList() != null ? ctx.exprList().expression() : new ArrayList<KebabParser.ExpressionContext>();
+        List<KebabParser.ExpressionContext> params = ctx.exprList() != null ? ctx.exprList().expression() : new ArrayList<>();
         String id = ctx.Identifier().getText() + params.size();
         Func function;
         if ((function = functions.get(id)) != null) {
@@ -536,23 +566,23 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     //  : Else Do block
     //  ;
     @Override
-    public KebabValue visitIfStatement(@NotNull KebabParser.IfStatementContext ctx) {
+    public KebabValue visitCompleteIfStatement(@NotNull KebabParser.CompleteIfStatementContext ctx) {
 
         // if ...
-        if (this.visit(ctx.ifStat().expression()).asBoolean()) {
-            return this.visit(ctx.ifStat().block());
+        if (this.visit(ctx.ifStatement().expression()).asBoolean()) {
+            return this.visit(ctx.ifStatement().block());
         }
 
         // else if ...
-        for (int i = 0; i < ctx.elseIfStat().size(); i++) {
-            if (this.visit(ctx.elseIfStat(i).expression()).asBoolean()) {
-                return this.visit(ctx.elseIfStat(i).block());
+        for (int i = 0; i < ctx.elseIfStatement().size(); i++) {
+            if (this.visit(ctx.elseIfStatement(i).expression()).asBoolean()) {
+                return this.visit(ctx.elseIfStatement(i).block());
             }
         }
 
         // else ...
-        if (ctx.elseStat() != null) {
-            return this.visit(ctx.elseStat().block());
+        if (ctx.elseStatement() != null) {
+            return this.visit(ctx.elseStatement().block());
         }
 
         return KebabValue.VOID;
@@ -565,9 +595,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     public KebabValue visitBlock(KebabParser.BlockContext ctx) {
 
         scope = new Scope(scope); // create new local scope
-        for (KebabParser.StatementContext sx : ctx.statement()) {
-            this.visit(sx);
-        }
+        ctx.statement().forEach(this::visit);
         KebabParser.ExpressionContext ex;
         if ((ex = ctx.expression()) != null) {
             returnValue.value = this.visit(ex);
@@ -586,7 +614,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         int start = this.visit(ctx.expression(0)).asDouble().intValue();
         int stop = this.visit(ctx.expression(1)).asDouble().intValue();
         for (int i = start; i <= stop; i++) {
-            scope.assign(ctx.Identifier().getText(), new KebabValue(i));
+            scope.assign(ctx.start, ctx.Identifier().getText(), new KebabValue(i));
             KebabValue returnValue = this.visit(ctx.block());
             if (returnValue != KebabValue.VOID) {
                 return returnValue;

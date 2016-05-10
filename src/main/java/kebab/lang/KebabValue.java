@@ -2,6 +2,7 @@ package kebab.lang;
 
 import kebab.util.Assert;
 import kebab.util.KebabException;
+import kebab.util.Variables;
 
 import java.util.List;
 
@@ -118,6 +119,6 @@ public class KebabValue implements Comparable<KebabValue> {
 
     @Override
     public String toString() {
-        return isEmpty() ? "EMPTY" : isVoid() ? "VOID" : String.valueOf(value);
+        return isEmpty() ? "empty" : isVoid() ? "void" : isBoolean() ? Variables.booleanToString(value) : String.valueOf(value);
     }
 }
