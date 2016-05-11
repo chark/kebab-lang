@@ -21,3 +21,15 @@ a: no
 _if(!a) {
     show('no' + 'ab\n')
 }
+
+@ Create null variable and check if its not null in lists.
+keb someNull
+_if(!someNull) {
+    show('empty')
+}
+
+@ Re-assign value, non-null now.
+someNull: 5
+_if(someNull != empy) {
+    show('not empy')
+}

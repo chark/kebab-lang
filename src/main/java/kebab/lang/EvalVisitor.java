@@ -58,14 +58,21 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         return new KebabValue(-1 * v.asDouble());
     }
 
-    // '!' expression                           #notExpression
+    /**
+     * Visit no expression.
+     * <pre>
+     * | '!' expression
+     * </pre>
+     */
     @Override
     public KebabValue visitNotExpression(KebabParser.NotExpressionContext ctx) {
-        KebabValue v = this.visit(ctx.expression());
-        if (!v.isBoolean()) {
+        KebabValue value = this.visit(ctx.expression());
+
+        // Not expressions only allowed for booleans and nulls.
+        if (!value.isBoolean() && !value.isEmpty()) {
             throw new KebabException(ctx);
         }
-        return new KebabValue(!v.asBoolean());
+        return new KebabValue(!value.asBoolean());
     }
 
     // expression '^' expression                #powerExpression
@@ -328,9 +335,14 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         return new KebabValue(BOOL_TRUE.equals(ctx.getText()));
     }
 
-    // Null                                     #nullExpression
+    /**
+     * Null, empty expression.
+     * <pre>
+     * | Empty
+     * </pre>
+     */
     @Override
-    public KebabValue visitNullExpression(@NotNull KebabParser.NullExpressionContext ctx) {
+    public KebabValue visitEmptyExpression(@NotNull KebabParser.EmptyExpressionContext ctx) {
         return KebabValue.EMPTY;
     }
 
@@ -338,7 +350,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         for (KebabParser.ExpressionContext ec : indexes) {
             KebabValue idx = this.visit(ec);
             if (!idx.isNumber() || (!val.isList() && !val.isString())) {
-                throw new KebabException("Problem resolving indexes on " + val + " at " + idx, ec);
+                throw new KebabException(ec.start, "Could not resolve indexes on: '%s' at: %s", val, idx);
             }
             int i = idx.asDouble().intValue();
             if (val.isString()) {
@@ -513,7 +525,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
      */
     @Override
     public KebabValue visitShowFunctionCall(KebabParser.ShowFunctionCallContext ctx) {
-        System.out.println(this.visit(ctx.expression()).asString());
+        System.out.println(this.visit(ctx.expression()));
         return KebabValue.VOID;
     }
 
@@ -549,37 +561,42 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         throw new KebabException(ctx);
     }
 
-    // ifStatement
-    //  : ifStat elseIfStat* elseStat? End
-    //  ;
-    //
-    // ifStat
-    //  : If expression Do block
-    //  ;
-    //
-    // elseIfStat
-    //  : Else If expression Do block
-    //  ;
-    //
-    // elseStat
-    //  : Else Do block
-    //  ;
+    /**
+     * Complete if statement.
+     * <pre>
+     * completeIfStatement
+     *  : ifStatement elseIfStatement* elseStatement? Close
+     *  ;
+     *
+     * ifStatement
+     *  : If '(' expression ')' Open block
+     *  ;
+     *
+     * elseIfStatement
+     *  : Close ElseIf '(' expression ')' Open block
+     *  ;
+     *
+     * elseStatement
+     *  : Close Else Open block
+     *  ;
+     * </pre>
+     */
     @Override
     public KebabValue visitCompleteIfStatement(@NotNull KebabParser.CompleteIfStatementContext ctx) {
 
-        // if ...
+        // _if(...)
         if (this.visit(ctx.ifStatement().expression()).asBoolean()) {
             return this.visit(ctx.ifStatement().block());
         }
 
-        // else if ...
+        // _elif(...)
         for (int i = 0; i < ctx.elseIfStatement().size(); i++) {
             if (this.visit(ctx.elseIfStatement(i).expression()).asBoolean()) {
                 return this.visit(ctx.elseIfStatement(i).block());
             }
         }
 
-        // else ...
+        // _el(...)
         if (ctx.elseStatement() != null) {
             return this.visit(ctx.elseStatement().block());
         }

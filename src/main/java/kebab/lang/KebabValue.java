@@ -2,11 +2,27 @@ package kebab.lang;
 
 import kebab.util.Assert;
 import kebab.util.KebabException;
-import kebab.util.Variables;
 
 import java.util.List;
 
 public class KebabValue implements Comparable<KebabValue> {
+
+    public enum Values {
+        BOOLEAN_TRUE("yes"),
+        BOOLEAN_FALSE("no"),
+        EMPTY("empty"),
+        VOID("void");
+
+        String name;
+
+        Values(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 
     public static final KebabValue EMPTY = new KebabValue();
     public static final KebabValue VOID = new KebabValue();
@@ -63,8 +79,16 @@ public class KebabValue implements Comparable<KebabValue> {
         return value.hashCode();
     }
 
+    /**
+     * Return current value as boolean, empty value counts as false.
+     *
+     * @return current value as boolean.
+     */
     public Boolean asBoolean() {
-        return (Boolean) value;
+        if (isBoolean()) {
+            return (Boolean) value;
+        }
+        return !isEmpty();
     }
 
     public Double asDouble() {
@@ -119,6 +143,14 @@ public class KebabValue implements Comparable<KebabValue> {
 
     @Override
     public String toString() {
-        return isEmpty() ? "empty" : isVoid() ? "void" : isBoolean() ? Variables.booleanToString(value) : String.valueOf(value);
+        if (isEmpty()) {
+            return Values.EMPTY.getName();
+        } else if (isVoid()) {
+            return Values.VOID.getName();
+        } else if (isBoolean()) {
+            return Boolean.valueOf(value.toString()) ? Values.BOOLEAN_TRUE.getName() : Values.BOOLEAN_FALSE.getName();
+        } else {
+            return String.valueOf(value);
+        }
     }
 }

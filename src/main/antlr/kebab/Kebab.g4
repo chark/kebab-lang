@@ -121,7 +121,7 @@ expression
  | expression In expression                 #inExpression
  | Number                                   #numberExpression
  | Bool                                     #boolExpression
- | Null                                     #nullExpression
+ | Empty                                    #emptyExpression
  | functionCall indexes?                    #functionCallExpression
  | list indexes?                            #listExpression
  | Identifier indexes?                      #identifierExpression
@@ -148,7 +148,7 @@ Else     : '_el';
 ElseIf   : '_elif';
 
 // Printing function (new-line).
-Show    : 'show';
+Show     : 'show';
 
 Input    : 'input';
 Assert   : 'assert';
@@ -159,7 +159,7 @@ For      : 'for';
 While    : 'while';
 To       : 'to';
 In       : 'in';
-Null     : 'empy';
+Empty    : 'empty';
 
 Or       : '||';
 And      : '&&';
@@ -176,8 +176,6 @@ Subtract : '-';
 Multiply : '*';
 Divide   : '/';
 Modulus  : '%';
-OBrace   : '{';
-CBrace   : '}';
 OBracket : '[';
 CBracket : ']';
 OParen   : '(';
