@@ -2,6 +2,7 @@ package kebab.lang;
 
 import kebab.KebabBaseVisitor;
 import kebab.KebabParser;
+import kebab.lang.func.Func;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -386,7 +387,9 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         val.asList().set(idx.asDouble().intValue(), newVal);
     }
 
-    // functionCall indexes?                    #functionCallExpression
+    /**
+     * Call a function, either a custom or pre-defined.
+     */
     @Override
     public KebabValue visitFunctionCallExpression(KebabParser.FunctionCallExpressionContext ctx) {
         KebabValue val = this.visit(ctx.functionCall());
@@ -510,13 +513,25 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         return KebabValue.VOID;
     }
 
-    // Identifier '(' exprList? ')' #identifierFunctionCall
+    /**
+     * Function call with args or no args.
+     * <pre>
+     * : Identifier (('(' expressionList? ')') | '()') #identifierFunctionCall
+     * </pre>
+     */
     @Override
     public KebabValue visitIdentifierFunctionCall(KebabParser.IdentifierFunctionCallContext ctx) {
         List<KebabParser.ExpressionContext> params = ctx.expressionList() != null ? ctx.expressionList().expression() : new ArrayList<>();
-        String id = ctx.Identifier().getText() + params.size();
+        String id = ctx.Identifier().getText();
+
         Func function;
-        if ((function = functions.get(id)) != null) {
+        if ((function = functions.get(id + params.size())) != null) {
+
+            // Try to get a function by real parameter count.
+            return function.invoke(params, functions, scope);
+        } else if ((function = functions.get(id)) != null && function.isPureleyOptional()) {
+
+            // Try to get a purely optional function.
             return function.invoke(params, functions, scope);
         }
         throw new KebabException(ctx);
@@ -625,9 +640,14 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         return KebabValue.VOID;
     }
 
-    // block
-    // : (statement | functionDecl)* (Return expression)?
-    // ;
+    /**
+     * Code block - scope.
+     * <pre>
+     * block
+     *  : (statement | functionDeclaration)* (Return expression)?
+     *  ;
+     * </pre>
+     */
     @Override
     public KebabValue visitBlock(KebabParser.BlockContext ctx) {
 
@@ -693,10 +713,6 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         scope.remove(ctx.start, id);
         return KebabValue.VOID;
     }
-
-    // whileStatement
-    // : While expression OBrace block CBrace
-    // ;
 
     /**
      * A simple while loop.

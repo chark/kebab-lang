@@ -4,6 +4,7 @@
 keb test: 3
 test: 'test'
 test: [1, 2, 3]
+showl(test[0])
 
 @ If statements.
 test: 3
@@ -40,11 +41,25 @@ _loop(i : test) {
 showl()
 
 @ Functions!
-_func testLoop(someList) {
+_func testLoop(someList : ['super ', 'not '], message : 'end - testLoop') {
     _loop(i : someList) {
         show(i + 'fun ')
     }
-    _ret 'Function ended :)'
+    _ret message
 }
 
+@ Check if function returned something.
 showl(testLoop(test))
+
+@ Call function with no arguments.
+showl(testLoop())
+
+@Test an empty func.
+_func emptyFunc(end: no) {
+    showl('I\'m empty and sad')
+    _if (!end) {
+        @ Recursion!
+        emptyFunc(yes)
+    }
+}
+emptyFunc()

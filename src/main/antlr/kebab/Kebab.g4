@@ -45,11 +45,11 @@ reAssignment
  ;
 
 functionCall
- : Identifier '(' expressionList?  ')'            #identifierFunctionCall
- | Show       '(' expression ')'            #showFunctionCall
- | ShowL      (('(' expression ')') | '()') #showLineFunctionCall
- | Assert     '(' expression ')'            #assertFunctionCall
- | Size       '(' expression ')'            #sizeFunctionCall
+ : Identifier (('(' expressionList? ')') | '()') #identifierFunctionCall
+ | Show       '(' expression ')'                 #showFunctionCall
+ | ShowL      (('(' expression ')') | '()')      #showLineFunctionCall
+ | Assert     '(' expression ')'                 #assertFunctionCall
+ | Size       '(' expression ')'                 #sizeFunctionCall
  ;
 
 /*
@@ -82,8 +82,18 @@ elseStatement
  : Close Else Open block
  ;
 
+/*
+    Delcare a function, with args and no args.
+
+    _func test(a, b : 3) {
+    }
+
+    _fun test() {
+    }
+*/
 functionDeclaration
- : Func Identifier '(' identifierList? ')' Open block Close
+ : Func Identifier '(' argumentList? ')' Open block Close
+ | Func Identifier '()' Open block Close
  ;
 
 /*
@@ -109,10 +119,12 @@ loopStatement
  : Loop '(' expression ')' Open block Close
  ;
 
-identifierList
- : Identifier (',' Identifier)*
+// Function argument list, including optionals.
+argumentList
+ : argument (',' argument)*
  ;
 
+// Epressions passed to a function.
 expressionList
  : expression (',' expression)*
  ;
@@ -153,6 +165,11 @@ list
 
 indexes
  : ('[' expression ']')+
+ ;
+
+// Function argument or argument with default value.
+argument
+ : Identifier (':' expression)?
  ;
 
 // General tokens.
@@ -220,7 +237,7 @@ Number
  : Int ('.' Digit*)?
  ;
 
-// Default id naming.
+// Id naming.
 Identifier
  : [a-zA-Z_] [a-zA-Z_0-9]*
  ;

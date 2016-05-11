@@ -1,9 +1,9 @@
 package kebab;
 
 import kebab.lang.EvalVisitor;
-import kebab.lang.Func;
+import kebab.lang.func.Func;
 import kebab.lang.Scope;
-import kebab.lang.SymbolVisitor;
+import kebab.lang.func.SymbolVisitor;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
