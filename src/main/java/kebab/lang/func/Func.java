@@ -1,9 +1,9 @@
 package kebab.lang.func;
 
 import kebab.KebabParser;
-import kebab.lang.EvalVisitor;
-import kebab.lang.KebabValue;
-import kebab.lang.ReturnValue;
+import kebab.lang.EvaluationVisitor;
+import kebab.lang.value.KebabValue;
+import kebab.lang.value.ReturnValue;
 import kebab.lang.Scope;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -13,11 +13,14 @@ import java.util.Map;
 
 public class Func {
 
+    public static final String MAIN_FUNC = "main";
+
     private final List<FuncParameter> parameters;
     private final String identifier;
     private final ParseTree block;
 
     private final int realParameterCount;
+    private List<Object> args;
 
     public Func(List<FuncParameter> parameters,
                 String identifier,
@@ -49,7 +52,7 @@ public class Func {
         // Scope of the function.
         scope = new Scope(scope);
 
-        EvalVisitor evalVisitor = new EvalVisitor(scope, functions);
+        EvaluationVisitor evaluationVisitor = new EvaluationVisitor(scope, functions);
 
         for (int i = 0; i < this.parameters.size(); i++) {
 
@@ -59,18 +62,18 @@ public class Func {
             if (i < params.size()) {
 
                 // Assign real parameters.
-                value = evalVisitor.visit(params.get(i));
+                value = evaluationVisitor.visit(params.get(i));
             } else {
 
                 // Assign optional parameters.
-                value = evalVisitor.visit(virtual.getContext());
+                value = evaluationVisitor.visit(virtual.getContext());
             }
             scope.assignParam(virtual.getIdentifier(), value);
         }
 
         KebabValue value = KebabValue.VOID;
         try {
-            evalVisitor.visit(this.block);
+            evaluationVisitor.visit(this.block);
         } catch (ReturnValue returnValue) {
             value = returnValue.value;
         }
@@ -78,20 +81,38 @@ public class Func {
     }
 
     /**
-     * Get non-optional parameter count for this function.
-     *
-     * @return non-optional parameter count.
-     */
-    public int getRealParameterCount() {
-        return realParameterCount;
-    }
-
-    /**
      * Check if function has only optional params.
      *
      * @return true if function has only optional params.
      */
-    public boolean isPureleyOptional() {
+    public boolean isPurelyOptional() {
         return realParameterCount == 0;
+    }
+
+    /**
+     * Check if this function is the main function.
+     *
+     * @return true if this function is the main function or false otherwise.
+     */
+    public boolean isMainFunction() {
+        return MAIN_FUNC.equals(identifier);
+    }
+
+    /**
+     * Set arguments.
+     *
+     * @param args function arguments.
+     */
+    public void setArgs(List<Object> args) {
+        this.args = args;
+    }
+
+    /**
+     * Get passed arguments to this function, note this only applies to the main func.
+     *
+     * @return function arguments.
+     */
+    public List<Object> getArgs() {
+        return args;
     }
 }

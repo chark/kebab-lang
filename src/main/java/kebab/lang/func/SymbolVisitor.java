@@ -2,7 +2,7 @@ package kebab.lang.func;
 
 import kebab.KebabBaseVisitor;
 import kebab.KebabParser;
-import kebab.lang.KebabValue;
+import kebab.lang.value.KebabValue;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -12,8 +12,8 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
 
     private final Map<String, Func> functions;
 
-    public SymbolVisitor(Map<String, Func> functions) {
-        this.functions = functions;
+    public SymbolVisitor() {
+        this.functions = new HashMap<>();
     }
 
     @Override
@@ -66,8 +66,15 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
                 .Identifier()
                 .getText();
 
-        // Only non-optional parameters count!
-        if (realParameterCount > 0) {
+        if (Func.MAIN_FUNC.equals(identifier)) {
+
+            if (realParameterCount != 1) {
+                throw new KebabException(context.start, "Main function must have only one param");
+            }
+
+        } else if (realParameterCount > 0) {
+
+            // Only non-optional parameters count!
             identifier += realParameterCount;
         }
 
@@ -78,5 +85,14 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
                 realParameterCount));
 
         return KebabValue.VOID;
+    }
+
+    /**
+     * Get functions of symbol visitor.
+     *
+     * @return visible functions.
+     */
+    public Map<String, Func> getFunctions() {
+        return functions;
     }
 }

@@ -1,4 +1,4 @@
-package kebab.lang;
+package kebab.lang.value;
 
 public class ReturnValue extends RuntimeException {
 

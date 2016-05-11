@@ -1,5 +1,6 @@
 package kebab.lang;
 
+import kebab.lang.value.KebabValue;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.Token;
 

@@ -1,5 +1,7 @@
 @ A complete test of various functions of the kebab-lang.
 
+show('kek\n\nkek')
+
 @ Variable assignment tests.
 keb test: 3
 test: 'test'
@@ -63,3 +65,9 @@ _func emptyFunc(end: no) {
     }
 }
 emptyFunc()
+
+@ Main function is required.
+_func main(args) {
+    show(args)
+    _ret 'da'
+}

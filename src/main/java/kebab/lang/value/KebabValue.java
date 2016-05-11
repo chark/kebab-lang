@@ -1,4 +1,4 @@
-package kebab.lang;
+package kebab.lang.value;
 
 import kebab.util.Assert;
 import kebab.util.KebabException;
@@ -114,6 +114,15 @@ public class KebabValue implements Comparable<KebabValue> {
         if (!(isBoolean() || isList() || isNumber() || isString())) {
             throw new KebabException("Got invalid type: %s", value.getClass());
         }
+    }
+
+    /**
+     * Get the pure value of this kebab value wrapper.
+     *
+     * @return pure value.
+     */
+    public Object get() {
+        return value;
     }
 
     @Override

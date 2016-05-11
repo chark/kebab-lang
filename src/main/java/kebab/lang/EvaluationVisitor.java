@@ -3,6 +3,8 @@ package kebab.lang;
 import kebab.KebabBaseVisitor;
 import kebab.KebabParser;
 import kebab.lang.func.Func;
+import kebab.lang.value.KebabValue;
+import kebab.lang.value.ReturnValue;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
+public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
 
     private static final String BOOL_TRUE = "yes";
 
@@ -25,7 +27,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     private Scope scope;
     private Map<String, Func> functions;
 
-    public EvalVisitor(Scope scope, Map<String, Func> functions) {
+    public EvaluationVisitor(Scope scope, Map<String, Func> functions) {
         this.scope = scope;
         this.functions = functions;
     }
@@ -529,7 +531,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
 
             // Try to get a function by real parameter count.
             return function.invoke(params, functions, scope);
-        } else if ((function = functions.get(id)) != null && function.isPureleyOptional()) {
+        } else if ((function = functions.get(id)) != null && function.isPurelyOptional()) {
 
             // Try to get a purely optional function.
             return function.invoke(params, functions, scope);
