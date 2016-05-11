@@ -8,7 +8,7 @@ public class Main {
 
         try {
             KebabEngine
-                    .file("src/main/resources/test2.kebab", "arg")
+                    .file("src/main/resources/main.kebab", "arg")
                     .run();
 
         } catch (Exception e) {
