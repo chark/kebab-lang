@@ -64,6 +64,20 @@ public class Scope {
     }
 
     /**
+     * Remove a variable from a scope.
+     *
+     * @param token    token where the statement starts.
+     * @param variable variable to remove.
+     */
+    public void remove(Token token, String variable) {
+        KebabValue value = variables.get(variable);
+        if (value == null) {
+            throw new KebabException(token, "Variable: '%s' does not exist", variable);
+        }
+        variables.remove(variable);
+    }
+
+    /**
      * Create a shallow copy of this scope. Used in case functions are are recursively called. If we wouldn't create
      * a copy in such cases, changing the variables would result in changes ro the Maps from  other "recursive scopes".
      */
@@ -93,6 +107,10 @@ public class Scope {
             variables.put(variable, value);
         } else if (parent != null) {
 
+            // Maybe the parent has this variable?
+            parent.reAssign(token, variable, value);
+        } else {
+
             // The variable was not declared in this scope.
             throw new KebabException(token, "Variable '%s' is not declared in this scope",
                     variable);
@@ -104,7 +122,7 @@ public class Scope {
         KebabValue value = variables.get(var);
         if (value != null) {
 
-            // The variable resides in this scope.
+            // The variable is in global scope.
             return value;
         } else if (!isGlobalScope()) {
 

@@ -24,15 +24,19 @@ public class KebabException extends RuntimeException {
                 + String.format(message, args));
     }
 
+    /**
+     * A generic exception with just a message.
+     */
     public KebabException(String message, Object... args) {
         super(String.format(message, args));
     }
 
+    /**
+     * A generic exception with an attached context.
+     *
+     * @param context where the exception was thrown.
+     */
     public KebabException(ParserRuleContext context) {
-        this(String.format("Illegal expression: %s", context.getText()), context);
-    }
-
-    public KebabException(String message, ParserRuleContext context) {
-        super(String.format("%s line: %s", message, context.start.getLine()));
+        this(context.start, String.format("Illegal expression: %s", context.getText()));
     }
 }

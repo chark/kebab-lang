@@ -18,11 +18,11 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
     }
 
     @Override
-    public KebabValue visitFunctionDecl(KebabParser.FunctionDeclContext context) {
+    public KebabValue visitFunctionDeclaration(KebabParser.FunctionDeclarationContext context) {
 
         // Get func parameters and func name.
-        List<TerminalNode> params = context.idList() != null ?
-                context.idList().Identifier() :
+        List<TerminalNode> params = context.identifierList() != null ?
+                context.identifierList().Identifier() :
                 new ArrayList<>();
 
         // Func code block.

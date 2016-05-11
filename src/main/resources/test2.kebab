@@ -1,35 +1,50 @@
-@ Initial variable assignment.
-keb a: 3
+@ A complete test of various functions of the kebab-lang.
 
-@ Complete if statement.
-_if(a < 2) {
-    show('less ' + a)
-} _elif(a == 1) {
-      show('one \n' + a)
+@ Variable assignment tests.
+keb test: 3
+test: 'test'
+test: [1, 2, 3]
+
+@ If statements.
+test: 3
+_if (test == 3) {
+    showl('test is equal to 3')
+} _elif(test == 2) {
+    showl('test is equal to 2')
 } _el {
-    show('more ' + a)
+    showl('test is something else')
 }
 
-@ Check if boolean and re-assignment works.
-a: yes
-_if(a) {
-    show('yes')
+@ While loops.
+test: 0
+_loop(test < 10) {
+    test: test + 1
+
+    _if (test == 10) {
+        showl(test + '.')
+    } _el {
+        show(test + ', ')
+    }
 }
 
-@ Check if inverted boolean works.
-a: no
-_if(!a) {
-    show('no' + 'ab\n')
+@ For-each loops (only work for strings and lists).
+test: 'abc'
+_loop(i : test) {
+    show(i + ' ')
 }
 
-@ Create null variable and check if its not null in lists.
-keb someNull
-_if(!someNull) {
-    show('empty')
+test: [1, 2, 3]
+_loop(i : test) {
+    show(i + ' ')
+}
+showl()
+
+@ Functions!
+_func testLoop(someList) {
+    _loop(i : someList) {
+        show(i + 'fun ')
+    }
+    _ret 'Function ended :)'
 }
 
-@ Re-assign value, non-null now.
-someNull: 5
-_if(someNull != empy) {
-    show('not empy')
-}
+showl(testLoop(test))

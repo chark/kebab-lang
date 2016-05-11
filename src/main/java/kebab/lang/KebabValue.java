@@ -54,31 +54,6 @@ public class KebabValue implements Comparable<KebabValue> {
         }
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (this == VOID || other == VOID) {
-            throw new KebabException("Cannot use VOID: %s ==/!= %s", this, other);
-        }
-        if (this == other) {
-            return true;
-        }
-        if (other == null || this.getClass() != other.getClass()) {
-            return false;
-        }
-        KebabValue that = (KebabValue) other;
-        if (this.isNumber() && that.isNumber()) {
-            double diff = Math.abs(this.asDouble() - that.asDouble());
-            return diff < 0.00000000001;
-        } else {
-            return this.value.equals(that.value);
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return value.hashCode();
-    }
-
     /**
      * Return current value as boolean, empty value counts as false.
      *
@@ -142,6 +117,31 @@ public class KebabValue implements Comparable<KebabValue> {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (this == VOID || other == VOID) {
+            throw new KebabException("Cannot use VOID: %s ==/!= %s", this, other);
+        }
+        if (this == other) {
+            return true;
+        }
+        if (other == null || this.getClass() != other.getClass()) {
+            return false;
+        }
+        KebabValue that = (KebabValue) other;
+        if (this.isNumber() && that.isNumber()) {
+            double diff = Math.abs(this.asDouble() - that.asDouble());
+            return diff < 0.00000000001;
+        } else {
+            return this.value.equals(that.value);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
     public String toString() {
         if (isEmpty()) {
             return Values.EMPTY.getName();
@@ -149,8 +149,20 @@ public class KebabValue implements Comparable<KebabValue> {
             return Values.VOID.getName();
         } else if (isBoolean()) {
             return Boolean.valueOf(value.toString()) ? Values.BOOLEAN_TRUE.getName() : Values.BOOLEAN_FALSE.getName();
+        } else if (isNumber()) {
+
+            double doubleValue = asDouble();
+            int intValue = ((int) doubleValue);
+
+            // Our value might be a int.
+            if (doubleValue == intValue) {
+                return Integer.toString(intValue);
+            }
+            return Double.toString(doubleValue);
+
         } else {
             return String.valueOf(value);
+
         }
     }
 }

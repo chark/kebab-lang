@@ -29,9 +29,14 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         this.functions = functions;
     }
 
-    // functionDecl
+    /**
+     * Function declaration.
+     * functionDeclaration
+     * : Func Identifier '(' identifierList? ')' block Close
+     * ;
+     */
     @Override
-    public KebabValue visitFunctionDecl(KebabParser.FunctionDeclContext context) {
+    public KebabValue visitFunctionDeclaration(KebabParser.FunctionDeclarationContext context) {
         return KebabValue.VOID;
     }
 
@@ -39,8 +44,8 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     @Override
     public KebabValue visitList(KebabParser.ListContext context) {
         List<KebabValue> list = new ArrayList<>();
-        if (context.exprList() != null) {
-            for (KebabParser.ExpressionContext ex : context.exprList().expression()) {
+        if (context.expressionList() != null) {
+            for (KebabParser.ExpressionContext ex : context.expressionList().expression()) {
                 list.add(this.visit(ex));
             }
         }
@@ -508,7 +513,7 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
     // Identifier '(' exprList? ')' #identifierFunctionCall
     @Override
     public KebabValue visitIdentifierFunctionCall(KebabParser.IdentifierFunctionCallContext ctx) {
-        List<KebabParser.ExpressionContext> params = ctx.exprList() != null ? ctx.exprList().expression() : new ArrayList<>();
+        List<KebabParser.ExpressionContext> params = ctx.expressionList() != null ? ctx.expressionList().expression() : new ArrayList<>();
         String id = ctx.Identifier().getText() + params.size();
         Func function;
         if ((function = functions.get(id)) != null) {
@@ -525,7 +530,23 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
      */
     @Override
     public KebabValue visitShowFunctionCall(KebabParser.ShowFunctionCallContext ctx) {
-        System.out.println(this.visit(ctx.expression()));
+        System.out.print(this.visit(ctx.expression()));
+        return KebabValue.VOID;
+    }
+
+    /**
+     * Printing of stuff, multiline.
+     * <pre>
+     * | ShowL (('(' expression ')') | '()')
+     * </pre>
+     */
+    @Override
+    public KebabValue visitShowLineFunctionCall(KebabParser.ShowLineFunctionCallContext ctx) {
+        if (ctx.expression() == null) {
+            System.out.println();
+        } else {
+            System.out.println(this.visit(ctx.expression()));
+        }
         return KebabValue.VOID;
     }
 
@@ -622,33 +643,81 @@ public class EvalVisitor extends KebabBaseVisitor<KebabValue> {
         return KebabValue.VOID;
     }
 
-    // forStatement
-    // : For Identifier '=' expression To expression OBrace block CBrace
-    // ;
+    /**
+     * A for-each loop for strings and lists.
+     * <pre>
+     * eachLoopStatement
+     * : EachLoop '(' Identifier Colon expression ')' Open block Close
+     * ;
+     * </pre>
+     */
     @Override
-    public KebabValue visitForStatement(KebabParser.ForStatementContext ctx) {
-        int start = this.visit(ctx.expression(0)).asDouble().intValue();
-        int stop = this.visit(ctx.expression(1)).asDouble().intValue();
-        for (int i = start; i <= stop; i++) {
-            scope.assign(ctx.start, ctx.Identifier().getText(), new KebabValue(i));
-            KebabValue returnValue = this.visit(ctx.block());
-            if (returnValue != KebabValue.VOID) {
-                return returnValue;
+    public KebabValue visitEachLoopStatement(KebabParser.EachLoopStatementContext ctx) {
+
+        KebabValue iterate = this.visit(ctx.expression());
+        if (!iterate.isString() && !iterate.isList()) {
+            throw new KebabException(ctx.start, "Cannot iterate a non-string or a non-list in a _each");
+        }
+
+        // Loop inner scope identifier.
+        String id = ctx.Identifier().getText();
+
+        // Make sure scope doesn't have a variable like this already.
+        scope.assign(ctx.start, id, KebabValue.EMPTY);
+        if (iterate.isString()) {
+
+            // Iterate a list of string.
+            for (char c : iterate.asString().toCharArray()) {
+                scope.reAssign(ctx.start, id, new KebabValue(String.valueOf(c)));
+
+                KebabValue returnValue = this.visit(ctx.block());
+                if (returnValue != KebabValue.VOID) {
+                    return returnValue;
+                }
+            }
+
+        } else if (iterate.isList()) {
+
+            // Iterate a list.
+            for (KebabValue value : iterate.asList()) {
+                scope.reAssign(ctx.start, id, value);
+
+                KebabValue returnValue = this.visit(ctx.block());
+                if (returnValue != KebabValue.VOID) {
+                    return returnValue;
+                }
             }
         }
+
+        // Clear the local for loop variable.
+        scope.remove(ctx.start, id);
         return KebabValue.VOID;
     }
 
     // whileStatement
     // : While expression OBrace block CBrace
     // ;
+
+    /**
+     * A simple while loop.
+     * loopStatement
+     * : Loop '(' expression ')' Open block Close
+     * ;
+     */
     @Override
-    public KebabValue visitWhileStatement(KebabParser.WhileStatementContext ctx) {
-        while (this.visit(ctx.expression()).asBoolean()) {
+    public KebabValue visitLoopStatement(KebabParser.LoopStatementContext ctx) {
+
+        // Gotta check initial while loop condition.
+        KebabValue expression = this.visit(ctx.expression());
+        while (expression.asBoolean()) {
+
             KebabValue returnValue = this.visit(ctx.block());
             if (returnValue != KebabValue.VOID) {
                 return returnValue;
             }
+
+            // Check loop condition all the time.
+            expression = this.visit(ctx.expression());
         }
         return KebabValue.VOID;
     }

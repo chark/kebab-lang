@@ -10,27 +10,28 @@ parse
 
 // A block, can be a variable or a function.
 block
- : (statement | functionDecl)* (Return expression ';')?
+ : (statement | functionDeclaration)* (Return expression)?
  ;
 
-// A generic statement, for example assignment keb a: 1
+// A generate statement, for example assignment keb a: 1
 statement
  : assignment
  | reAssignment
  | functionCall
  | completeIfStatement
- | forStatement
- | whileStatement
+ | eachLoopStatement
+ | loopStatement
  ;
 
 /*
     Assign a value to a variable.
 
     keb a: 1
+    keb b
 */
 assignment
- : 'keb' Identifier indexes? ':' expression
- | 'keb' Identifier indexes?
+ : Keb Identifier indexes? ':' expression
+ | Keb Identifier indexes?
  ;
 
 /*
@@ -44,10 +45,11 @@ reAssignment
  ;
 
 functionCall
- : Identifier '(' exprList? ')' #identifierFunctionCall
- | Show '(' expression ')'      #showFunctionCall
- | Assert '(' expression ')'    #assertFunctionCall
- | Size '(' expression ')'      #sizeFunctionCall
+ : Identifier '(' expressionList?  ')'            #identifierFunctionCall
+ | Show       '(' expression ')'            #showFunctionCall
+ | ShowL      (('(' expression ')') | '()') #showLineFunctionCall
+ | Assert     '(' expression ')'            #assertFunctionCall
+ | Size       '(' expression ')'            #sizeFunctionCall
  ;
 
 /*
@@ -80,23 +82,38 @@ elseStatement
  : Close Else Open block
  ;
 
-functionDecl
- : Def Identifier '(' idList? ')' block Close
+functionDeclaration
+ : Func Identifier '(' identifierList? ')' Open block Close
  ;
 
-forStatement
- : For Identifier '=' expression To expression Open block Close
+/*
+    A for-each like loop for strings and lists.
+
+    _each(a : 'abc) {
+        // loop stuff...
+    }
+*/
+eachLoopStatement
+ : Loop '(' Identifier Colon expression ')' Open block Close
  ;
 
-whileStatement
- : While expression Open block Close
+/*
+    A simple while type loop.
+
+    keb a: 0
+    _loop(a < 10) {
+        a: a + 1
+    }
+*/
+loopStatement
+ : Loop '(' expression ')' Open block Close
  ;
 
-idList
+identifierList
  : Identifier (',' Identifier)*
  ;
 
-exprList
+expressionList
  : expression (',' expression)*
  ;
 
@@ -131,33 +148,39 @@ expression
  ;
 
 list
- : '[' exprList? ']'
+ : '[' expressionList? ']'
  ;
 
 indexes
  : ('[' expression ']')+
  ;
 
-// Block tokens.
-Open      : '{';
-Close     : '}';
+// General tokens.
+Open     : '{';
+Close    : '}';
+Keb      :  'keb';
+Return   : '_ret';
 
 // If statements.
 If       : '_if';
 Else     : '_el';
 ElseIf   : '_elif';
 
-// Printing function (new-line).
+// Printing of variables and stuff.
 Show     : 'show';
+ShowL    : 'showl';
 
+// Loops: foreach and simple loop.
+EachLoop : '_each';
+Loop     : '_loop';
+
+// Function stuff.
+Func     : '_func';
+
+// todo sort out
 Input    : 'input';
 Assert   : 'assert';
 Size     : 'size';
-Def      : 'def';
-Return   : 'return';
-For      : 'for';
-While    : 'while';
-To       : 'to';
 In       : 'in';
 Empty    : 'empty';
 
@@ -192,17 +215,19 @@ Bool
  | 'no'
  ;
 
+// All numbers are of double type.
 Number
  : Int ('.' Digit*)?
  ;
 
+// Default id naming.
 Identifier
  : [a-zA-Z_] [a-zA-Z_0-9]*
  ;
 
+// String, 'someString "Inner"'
 String
- : ["] (~["\r\n] | '\\\\' | '\\"')* ["]
- | ['] (~['\r\n] | '\\\\' | '\\\'')* [']
+ : ['] (~['\r\n] | '\\\\' | '\\\'')* [']
  ;
 
 Comment
@@ -212,6 +237,7 @@ Comment
 Space
  : [ \t\r\n\u000C] -> skip
  ;
+
 fragment Int
  : [1-9] Digit*
  | '0'

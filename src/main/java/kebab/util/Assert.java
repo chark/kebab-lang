@@ -8,7 +8,7 @@ public class Assert {
         notNull(object, NULL_MESSAGE);
     }
 
-    public static void notNull(Object object, String message, String... args) {
+    public static void notNull(Object object, String message, Object... args) {
         if (object == null) {
             throw new KebabException(message, args);
         }
