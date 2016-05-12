@@ -1,0 +1,19 @@
+@ Fib sequence.
+_func fib(number) {
+    _if (number < 2) {
+        _ret number
+    } _el {
+        _ret fib(number - 2) + fib(number - 1)
+    }
+}
+
+keb numbers: []
+keb counter: 0
+
+@ Init fib sequence.
+_loop(counter < 10) {
+    numbers: numbers + fib(counter)
+    counter: counter + 1
+}
+
+showl(numbers)

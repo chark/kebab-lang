@@ -7,15 +7,15 @@ import org.antlr.v4.runtime.Token;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Scope {
+public class Block {
 
     private final Map<String, KebabValue> variables;
-    private final Scope parent;
+    private final Block parent;
 
     /**
      * Create a global scope.
      */
-    public Scope() {
+    public Block() {
 
         // Global scope, parent is null.
         this(null);
@@ -26,17 +26,9 @@ public class Scope {
      *
      * @param parent parent of the scope.
      */
-    public Scope(Scope parent) {
+    public Block(Block parent) {
         this.parent = parent;
         this.variables = new HashMap<>();
-    }
-
-    /**
-     * Copy constructor.
-     */
-    private Scope(Map<String, KebabValue> variables, Scope parent) {
-        this.variables = variables;
-        this.parent = parent;
     }
 
     public void assignParam(String var, KebabValue value) {
@@ -78,19 +70,11 @@ public class Scope {
         variables.remove(variable);
     }
 
-    /**
-     * Create a shallow copy of this scope. Used in case functions are are recursively called. If we wouldn't create
-     * a copy in such cases, changing the variables would result in changes ro the Maps from  other "recursive scopes".
-     */
-    public Scope copy() {
-        return new Scope(this.variables, this.parent);
-    }
-
     public boolean isGlobalScope() {
         return parent == null;
     }
 
-    public Scope parent() {
+    public Block parent() {
         return parent;
     }
 

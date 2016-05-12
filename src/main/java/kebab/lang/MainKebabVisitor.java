@@ -19,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
+public class MainKebabVisitor extends KebabBaseVisitor<KebabValue> {
 
     private static final String BOOL_TRUE = "yes";
 
     private static ReturnValue returnValue = new ReturnValue();
-    private Scope scope;
+    private Block scope;
     private Map<String, Func> functions;
 
-    public EvaluationVisitor(Scope scope, Map<String, Func> functions) {
+    public MainKebabVisitor(Block scope, Map<String, Func> functions) {
         this.scope = scope;
         this.functions = functions;
     }
@@ -42,19 +42,6 @@ public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
     public KebabValue visitFunctionDeclaration(KebabParser.FunctionDeclarationContext context) {
         return KebabValue.VOID;
     }
-
-    // list: '[' exprList? ']'
-    @Override
-    public KebabValue visitList(KebabParser.ListContext context) {
-        List<KebabValue> list = new ArrayList<>();
-        if (context.expressionList() != null) {
-            for (KebabParser.ExpressionContext ex : context.expressionList().expression()) {
-                list.add(this.visit(ex));
-            }
-        }
-        return new KebabValue(list);
-    }
-
 
     // '-' expression                           #unaryMinusExpression
     @Override
@@ -129,6 +116,18 @@ public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
             return new KebabValue(total);
         }
         throw new KebabException(ctx);
+    }
+
+    // list: '[' exprList? ']'
+    @Override
+    public KebabValue visitList(KebabParser.ListContext context) {
+        List<KebabValue> list = new ArrayList<>();
+        if (context.expressionList() != null) {
+            for (KebabParser.ExpressionContext ex : context.expressionList().expression()) {
+                list.add(this.visit(ex));
+            }
+        }
+        return new KebabValue(list);
     }
 
     // expression '/' expression                #divideExpression
@@ -653,7 +652,7 @@ public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
     @Override
     public KebabValue visitBlock(KebabParser.BlockContext ctx) {
 
-        scope = new Scope(scope); // create new local scope
+        scope = new Block(scope); // create new local scope
         ctx.statement().forEach(this::visit);
         KebabParser.ExpressionContext ex;
         if ((ex = ctx.expression()) != null) {
@@ -678,7 +677,7 @@ public class EvaluationVisitor extends KebabBaseVisitor<KebabValue> {
 
         KebabValue iterate = this.visit(ctx.expression());
         if (!iterate.isString() && !iterate.isList()) {
-            throw new KebabException(ctx.start, "Cannot iterate a non-string or a non-list in a _each");
+            throw new KebabException(ctx.start, "Cannot iterate a non-string or a non-list in a _loop");
         }
 
         // Loop inner scope identifier.

@@ -8,11 +8,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
 
-public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
+public class KebabFunctionVisitor extends KebabBaseVisitor<KebabValue> {
 
     private final Map<String, Func> functions;
 
-    public SymbolVisitor() {
+    public KebabFunctionVisitor() {
         this.functions = new HashMap<>();
     }
 
@@ -66,13 +66,7 @@ public class SymbolVisitor extends KebabBaseVisitor<KebabValue> {
                 .Identifier()
                 .getText();
 
-        if (Func.MAIN_FUNC.equals(identifier)) {
-
-            if (realParameterCount != 1) {
-                throw new KebabException(context.start, "Main function must have only one param");
-            }
-
-        } else if (realParameterCount > 0) {
+        if (realParameterCount > 0) {
 
             // Only non-optional parameters count!
             identifier += realParameterCount;

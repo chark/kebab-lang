@@ -1,0 +1,10 @@
+@ Default args.
+_func kebab(message: 'I\'m default') {
+    showl(message)
+}
+
+@ Non-default call.
+kebab('Not default')
+
+@ Default call.
+kebab()

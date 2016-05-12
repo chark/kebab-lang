@@ -22,6 +22,16 @@ clean {
     delete rootProject.ext.generatedDir
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'kebab.Main'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 sourceSets {
     main {
         java {

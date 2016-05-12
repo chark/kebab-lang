@@ -1,0 +1,9 @@
+@ Variables.
+keb variable: 'test'
+showl(variable)
+
+variable: [1, 2.2, 'todzes']
+showl(variable)
+
+variable: 1.3
+showl(variable)

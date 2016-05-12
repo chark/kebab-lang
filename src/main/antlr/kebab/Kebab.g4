@@ -129,6 +129,7 @@ expressionList
  : expression (',' expression)*
  ;
 
+// All avaliable expressions.
 expression
  : '-' expression                           #unaryMinusExpression
  | '!' expression                           #notExpression
@@ -159,10 +160,12 @@ expression
  | Input '(' String? ')'                    #inputExpression
  ;
 
+// List with expressions.
 list
  : '[' expressionList? ']'
  ;
 
+// List indexes.
 indexes
  : ('[' expression ']')+
  ;
@@ -201,6 +204,7 @@ Size     : 'size';
 In       : 'in';
 Empty    : 'empty';
 
+// Generic operations and misc tokens.
 Or       : '||';
 And      : '&&';
 Equals   : '==';
@@ -247,10 +251,12 @@ String
  : ['] (~['\r\n] | '\\\\' | '\\\'')* [']
  ;
 
+// Comment -> @ Comment goes here.
 Comment
  : ('@' ~[\r\n]*) -> skip
  ;
 
+// Ignore spaces.
 Space
  : [ \t\r\n\u000C] -> skip
  ;

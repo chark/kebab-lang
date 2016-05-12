@@ -1,0 +1,22 @@
+@ If statements
+
+keb test: yes
+_if (test) {
+    showl('Yep')
+}
+
+test: no
+_if (test) {
+    showl('Yep')
+} _el {
+    showl('No')
+}
+
+test: 5
+_if (test == 4) {
+    showl('Four')
+} _elif (test == 5) {
+    showl('Five!')
+} _el {
+    showl('None')
+}

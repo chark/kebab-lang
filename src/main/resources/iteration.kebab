@@ -1,0 +1,19 @@
+@ Loopz.
+
+keb loopMe: 'super sad'
+_loop(s : loopMe) {
+    show(s)
+}
+showl()
+
+loopMe: [1, 2, 3, 4, 'asd']
+_loop(l : loopMe) {
+    show(l)
+}
+showl()
+
+loopMe: 0
+_loop(loopMe < 10) {
+    show(loopMe)
+    loopMe: loopMe + 1
+}

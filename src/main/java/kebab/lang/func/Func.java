@@ -1,10 +1,10 @@
 package kebab.lang.func;
 
 import kebab.KebabParser;
-import kebab.lang.EvaluationVisitor;
+import kebab.lang.Block;
+import kebab.lang.MainKebabVisitor;
 import kebab.lang.value.KebabValue;
 import kebab.lang.value.ReturnValue;
-import kebab.lang.Scope;
 import kebab.util.KebabException;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -13,14 +13,11 @@ import java.util.Map;
 
 public class Func {
 
-    public static final String MAIN_FUNC = "main";
-
     private final List<FuncParameter> parameters;
     private final String identifier;
     private final ParseTree block;
 
     private final int realParameterCount;
-    private List<Object> args;
 
     public Func(List<FuncParameter> parameters,
                 String identifier,
@@ -43,16 +40,16 @@ public class Func {
      */
     public KebabValue invoke(List<KebabParser.ExpressionContext> params,
                              Map<String, Func> functions,
-                             Scope scope) {
+                             Block scope) {
 
         if (params.size() > params.size()) {
             throw new KebabException("Invalid parameter count of on function: %s", identifier);
         }
 
-        // Scope of the function.
-        scope = new Scope(scope);
+        // Block of the function.
+        scope = new Block(scope);
 
-        EvaluationVisitor evaluationVisitor = new EvaluationVisitor(scope, functions);
+        MainKebabVisitor evaluationVisitor = new MainKebabVisitor(scope, functions);
 
         for (int i = 0; i < this.parameters.size(); i++) {
 
@@ -87,32 +84,5 @@ public class Func {
      */
     public boolean isPurelyOptional() {
         return realParameterCount == 0;
-    }
-
-    /**
-     * Check if this function is the main function.
-     *
-     * @return true if this function is the main function or false otherwise.
-     */
-    public boolean isMainFunction() {
-        return MAIN_FUNC.equals(identifier);
-    }
-
-    /**
-     * Set arguments.
-     *
-     * @param args function arguments.
-     */
-    public void setArgs(List<Object> args) {
-        this.args = args;
-    }
-
-    /**
-     * Get passed arguments to this function, note this only applies to the main func.
-     *
-     * @return function arguments.
-     */
-    public List<Object> getArgs() {
-        return args;
     }
 }
