@@ -45,11 +45,11 @@ reAssignment
  ;
 
 functionCall
- : Identifier (('(' expressionList? ')') | '()') #identifierFunctionCall
- | Show       '(' expression ')'                 #showFunctionCall
- | ShowL      (('(' expression ')') | '()')      #showLineFunctionCall
- | Assert     '(' expression ')'                 #assertFunctionCall
- | Size       '(' expression ')'                 #sizeFunctionCall
+ : Identifier '(' expressionList? ')' #identifierFunctionCall
+ | Show       '(' expression ')'      #showFunctionCall
+ | ShowL      '(' expression? ')'     #showLineFunctionCall
+ | Assert     '(' expression ')'      #assertFunctionCall
+ | Size       '(' expression ')'      #sizeFunctionCall
  ;
 
 /*
@@ -93,7 +93,6 @@ elseStatement
 */
 functionDeclaration
  : Func Identifier '(' argumentList? ')' Open block Close
- | Func Identifier '()' Open block Close
  ;
 
 /*
@@ -124,7 +123,7 @@ argumentList
  : argument (',' argument)*
  ;
 
-// Epressions passed to a function.
+// Expressions passed to a function.
 expressionList
  : expression (',' expression)*
  ;
