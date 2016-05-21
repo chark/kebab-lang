@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/Chark/kebab-lang/master/kebab_lang.png"/>
 </p>
 <hr/>
-`kebab-lang` is an awesome scripting language that overuses kebab_case convention for naming.
+`kebab-lang` is an awesome scripting language that overuses snake_case convention for naming.
 
 ### Setup
 JDK 1.8 and gradle installation is required. After cloning the project navigate yourself to the root directory and initiate this command:
